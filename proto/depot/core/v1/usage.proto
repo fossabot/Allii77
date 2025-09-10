@@ -4,9 +4,41 @@ package depot.core.v1;
 
 import "google/protobuf/timestamp.proto";
 
-service PublicUsageService {
+service UsageService {
+  rpc ListProjectUsage(ListProjectUsageRequest) returns (ListProjectUsageResponse);
+  rpc GetProjectUsage(GetProjectUsageRequest) returns (GetProjectUsageResponse);
+
   // GetUsage returns detailed Depot usage over a specified period of time
   rpc GetUsage(GetUsageRequest) returns (GetUsageResponse);
+}
+
+message ListProjectUsageRequest {
+  google.protobuf.Timestamp start_at = 1;
+  google.protobuf.Timestamp end_at = 2;
+  optional int32 page_size = 3;
+  optional string page_token = 4;
+}
+
+message ListProjectUsageResponse {
+  repeated ProjectUsage usage = 1;
+  string next_page_token = 2;
+}
+
+message GetProjectUsageRequest {
+  string project_id = 1;
+  google.protobuf.Timestamp start_at = 2;
+  google.protobuf.Timestamp end_at = 3;
+}
+
+message GetProjectUsageResponse {
+  ProjectUsage usage = 1;
+}
+
+message ProjectUsage {
+  string project_id = 1;
+  int32 build_count = 2;
+  int32 build_duration_seconds = 3;
+  int32 layer_cache_size_gb = 4;
 }
 
 message GetUsageRequest {
