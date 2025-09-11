@@ -54,7 +54,9 @@ message Project {
   Hardware hardware = 7;
 }
 
-message ListProjectsRequest {}
+message ListProjectsRequest {
+  optional string region_id = 1;
+}
 
 message ListProjectsResponse {
   repeated Project projects = 1;
