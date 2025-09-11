@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package depot.core.v1;
+
+import "google/protobuf/timestamp.proto";
+
+service UsageService {
+  rpc ListProjectUsage(ListProjectUsageRequest) returns (ListProjectUsageResponse);
+  rpc GetProjectUsage(GetProjectUsageRequest) returns (GetProjectUsageResponse);
+
+  // GetUsage returns detailed Depot usage over a specified period of time
+  rpc GetUsage(GetUsageRequest) returns (GetUsageResponse);
+}
+
+message ListProjectUsageRequest {
+  google.protobuf.Timestamp start_at = 1;
+  google.protobuf.Timestamp end_at = 2;
+  optional int32 page_size = 3;
+  optional string page_token = 4;
+}
+
+message ListProjectUsageResponse {
+  repeated ProjectUsage usage = 1;
+  string next_page_token = 2;
+}
+
+message GetProjectUsageRequest {
+  string project_id = 1;
+  google.protobuf.Timestamp start_at = 2;
+  google.protobuf.Timestamp end_at = 3;
+}
+
+message GetProjectUsageResponse {
+  ProjectUsage usage = 1;
+}
+
+message ProjectUsage {
+  string project_id = 1;
+  int32 build_count = 2;
+  int32 build_duration_seconds = 3;
+  int32 layer_cache_size_gb = 4;
+}
+
+message GetUsageRequest {
+  google.protobuf.Timestamp start_at = 1;
+  google.protobuf.Timestamp end_at = 2;
+}
+
+message GetUsageResponse {
+  google.protobuf.Timestamp period_start = 1;
+  google.protobuf.Timestamp period_end = 2;
+  repeated ContainerBuildUsage container_build = 3;
+  repeated GithubActionsJobsUsage github_actions_jobs = 4;
+  repeated StorageUsage storage = 5;
+  repeated AgentSandboxUsage agent_sandbox = 6;
+}
+
+message ContainerBuildUsage {
+  string project_name = 1;
+  int32 build_count = 2;
+  float minutes_saved = 3;
+  float minutes_billed = 4;
+}
+
+message GithubActionsJobsUsage {
+  string repo = 1;
+  GithubActionsJobsUsageTotal total = 2;
+  repeated GithubActionsJobUsageDetail jobs = 3;
+}
+
+// GithubActionsJobsUsageTotal is the aggregate of metrics for a given repo
+// over the specified period of time
+message GithubActionsJobsUsageTotal {
+  int32 job_count = 1;
+  float minutes_elapsed = 2;
+  float minutes_billed = 3;
+}
+
+message GithubActionsJobUsageDetail {
+  string workflow = 1;
+  string runner = 2;
+  int32 job_count = 3;
+  float minutes_elapsed = 4;
+  float minutes_billed = 5;
+}
+
+message StorageUsage {
+  string storage_type = 1;
+  float total_gb = 2;
+}
+
+message AgentSandboxUsage {
+  string agent_type = 1;
+  int32 sandboxes_count = 2;
+  float minutes_elapsed = 3;
+  float minutes_billed = 4; 
+}
