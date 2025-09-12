@@ -56,10 +56,13 @@ message Project {
 
 message ListProjectsRequest {
   optional string region_id = 1;
+  optional int32 page_size = 2;
+  optional string page_token = 3;
 }
 
 message ListProjectsResponse {
   repeated Project projects = 1;
+  optional string next_page_token = 2;
 }
 
 message GetProjectRequest {
