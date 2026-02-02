@@ -1,6 +1,7 @@
 syntax = "proto3";
 package depot.build.v1;
 
+import "depot/core/v1/build.proto";
 import "google/protobuf/timestamp.proto";
 
 service BuildService {
@@ -9,6 +10,7 @@ service BuildService {
 
   rpc GetBuildSteps(GetBuildStepsRequest) returns (GetBuildStepsResponse);
   rpc GetBuildStepLogs(GetBuildStepLogsRequest) returns (GetBuildStepLogsResponse);
+  rpc ListBuilds(ListBuildsRequest) returns (ListBuildsResponse);
 }
 
 message CreateBuildRequest {
@@ -82,4 +84,15 @@ message GetBuildStepLogsResponse {
   }
   repeated Log logs = 1;
   optional string next_page_token = 6;
+}
+
+message ListBuildsRequest {
+  string project_id = 1;
+  optional int32 page_size = 2;
+  optional string page_token = 3;
+}
+
+message ListBuildsResponse {
+  repeated depot.core.v1.Build builds = 1;
+  string next_page_token = 2;
 }
