@@ -1,0 +1,215 @@
+syntax = "proto3";
+
+package depot.registry.v1beta1;
+
+import "google/protobuf/timestamp.proto";
+
+service RegistryService {
+  rpc CreateToken(CreateTokenRequest) returns (CreateTokenResponse);
+  rpc ListTokens(ListTokensRequest) returns (ListTokensResponse);
+  rpc RevokeToken(RevokeTokenRequest) returns (RevokeTokenResponse);
+  rpc CreateRepository(CreateRepositoryRequest) returns (CreateRepositoryResponse);
+  rpc ListRepositories(ListRepositoriesRequest) returns (ListRepositoriesResponse);
+  rpc ListImages(ListImagesRequest) returns (ListImagesResponse);
+  rpc GetImageDetail(GetImageDetailRequest) returns (GetImageDetailResponse);
+  rpc DeleteRepository(DeleteRepositoryRequest) returns (DeleteRepositoryResponse);
+  rpc DeleteTag(DeleteTagRequest) returns (DeleteTagResponse);
+  rpc BatchDeleteImage(BatchDeleteImageRequest) returns (BatchDeleteImageResponse);
+  rpc GetRetentionPolicy(GetRetentionPolicyRequest) returns (GetRetentionPolicyResponse);
+  rpc UpsertRetentionPolicy(UpsertRetentionPolicyRequest) returns (UpsertRetentionPolicyResponse);
+  rpc DeleteRetentionPolicy(DeleteRetentionPolicyRequest) returns (DeleteRetentionPolicyResponse);
+}
+
+enum RegistryAccessTokenPermission {
+  REGISTRY_ACCESS_TOKEN_PERMISSION_UNSPECIFIED = 0;
+  REGISTRY_ACCESS_TOKEN_PERMISSION_PULL = 1;
+  REGISTRY_ACCESS_TOKEN_PERMISSION_PUSH = 2;
+}
+
+message CreateTokenRequest {
+  string name = 1;
+  RegistryAccessTokenPermission permission = 2;
+  repeated string repository_scopes = 3;
+  optional google.protobuf.Timestamp expires_at = 4;
+  optional string description = 5;
+}
+
+message CreateTokenResponse {
+  RegistryAccessToken token = 1;
+  string secret = 2;
+}
+
+message ListTokensRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  optional string query = 3;
+}
+
+message ListTokensResponse {
+  repeated RegistryAccessToken tokens = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  int32 total_count = 4;
+}
+
+message RevokeTokenRequest {
+  string token_id = 1;
+}
+
+message RevokeTokenResponse {
+  RegistryAccessToken token = 1;
+}
+
+message CreateRepositoryRequest {
+  string repository = 1;
+}
+
+message CreateRepositoryResponse {}
+
+message ListRepositoriesRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  optional string query = 3;
+}
+
+message ListRepositoriesResponse {
+  repeated RepositorySummary repositories = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  bool has_more = 4;
+}
+
+message RepositorySummary {
+  string name = 1;
+  int64 tag_count = 2;
+  int64 size_bytes = 3;
+  google.protobuf.Timestamp created_at = 4;
+  optional google.protobuf.Timestamp last_pushed_at = 5;
+  string scope = 6;
+}
+
+enum ImageTagStatus {
+  IMAGE_TAG_STATUS_UNSPECIFIED = 0;
+  IMAGE_TAG_STATUS_TAGGED = 1;
+  IMAGE_TAG_STATUS_UNTAGGED = 2;
+}
+
+message ListImagesRequest {
+  string repository = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  optional string tag_query = 4;
+  ImageTagStatus tag_status = 5;
+}
+
+message ListImagesResponse {
+  repeated ImageSummary images = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  bool has_more = 4;
+}
+
+message ImageSummary {
+  string digest = 1;
+  string media_type = 2;
+  string config_media_type = 3;
+  int64 size_bytes = 4;
+  repeated string tags = 5;
+  google.protobuf.Timestamp pushed_at = 6;
+}
+
+message GetImageDetailRequest {
+  string repository = 1;
+  string reference = 2;
+}
+
+message GetImageDetailResponse {
+  string digest = 1;
+  string media_type = 2;
+  string config_media_type = 3;
+  int64 size_bytes = 4;
+  repeated string tags = 5;
+  google.protobuf.Timestamp pushed_at = 6;
+  bytes manifest = 7;
+}
+
+message DeleteRepositoryRequest {
+  string repository = 1;
+}
+
+message DeleteRepositoryResponse {}
+
+message DeleteTagRequest {
+  string repository = 1;
+  string tag = 2;
+}
+
+message DeleteTagResponse {}
+
+message ImageIdentifier {
+  optional string image_digest = 1;
+  optional string image_tag = 2;
+}
+
+message ImageFailure {
+  ImageIdentifier image_id = 1;
+  string failure_code = 2;
+  string failure_reason = 3;
+}
+
+message BatchDeleteImageRequest {
+  string repository = 1;
+  repeated ImageIdentifier image_ids = 2;
+}
+
+message BatchDeleteImageResponse {
+  repeated ImageIdentifier image_ids = 1;
+  repeated ImageFailure failures = 2;
+}
+
+message RegistryAccessToken {
+  string id = 1;
+  string name = 2;
+  RegistryAccessTokenPermission permission = 3;
+  repeated string repository_scopes = 4;
+  optional google.protobuf.Timestamp expires_at = 5;
+  optional google.protobuf.Timestamp revoked_at = 6;
+  google.protobuf.Timestamp created_at = 7;
+  optional string description = 8;
+  string created_by_kind = 9;
+  string created_by = 10;
+}
+
+message RetentionPolicy {
+  string repository = 1;
+  bool enabled = 2;
+  optional int32 keep_count = 3;
+  optional int32 keep_days = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message GetRetentionPolicyRequest {
+  string repository = 1;
+}
+
+message GetRetentionPolicyResponse {
+  optional RetentionPolicy policy = 1;
+}
+
+message UpsertRetentionPolicyRequest {
+  string repository = 1;
+  bool enabled = 2;
+  optional int32 keep_count = 3;
+  optional int32 keep_days = 4;
+}
+
+message UpsertRetentionPolicyResponse {
+  RetentionPolicy policy = 1;
+}
+
+message DeleteRetentionPolicyRequest {
+  string repository = 1;
+}
+
+message DeleteRetentionPolicyResponse {}

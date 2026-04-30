@@ -1,7 +1,6 @@
 syntax = "proto3";
 package depot.build.v1;
 
-import "depot/core/v1/build.proto";
 import "google/protobuf/timestamp.proto";
 
 service BuildService {
